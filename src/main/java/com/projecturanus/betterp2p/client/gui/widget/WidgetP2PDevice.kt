@@ -42,7 +42,7 @@ class WidgetP2PDevice(private val selectedInfoProperty: KMutableProperty0<InfoWr
             }
 
             fontRenderer.drawString(info.description, x + 24, y + 3, 0)
-            fontRenderer.drawString(I18n.format("gui.advanced_memory_card.pos", info.posX, info.posY, info.posZ), x + 24, y + 12, 0)
+            fontRenderer.drawString(I18n.format("gui.advanced_memory_card.pos", info.posX, info.posY, info.posZ, info.facing.name), x + 24, y + 12, 0)
 
             if (selectedInfo == null) {
                 info.bindButton.enabled = false
