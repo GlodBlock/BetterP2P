@@ -33,7 +33,28 @@ class InfoWrapper(info: P2PInfo) {
             if (info.frequency.toInt() == 0)
                 append(I18n.format("gui.advanced_memory_card.desc.not_set"))
             else
-                append(info.frequency.toString())
+                append(info.frequency.toHexString().format4())
         }
     }
+}
+
+fun Long.toHexString(): String {
+    var tmp = this
+    var hex = String()
+    while (tmp != 0.toLong()) {
+        hex += Integer.toHexString((tmp % 16).toInt())
+        tmp /= 16
+    }
+    return hex.toUpperCase().reversed()
+}
+
+fun String.format4(): String {
+    var format = String()
+    for (index in this.indices) {
+        if (index % 4 == 0 && index != 0) {
+            format += " "
+        }
+        format += this[index]
+    }
+    return format
 }
