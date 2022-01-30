@@ -1,0 +1,131 @@
+import java.util.concurrent.TimeUnit
+
+buildscript {
+    repositories {
+        mavenCentral()
+		maven {
+			name = "gt"
+			url = "https://gregtech.overminddl1.com/"
+        }
+        maven {
+            name = "jitpack"
+            url = "https://jitpack.io"
+        }
+        maven {
+            name = "sonatype"
+            url = "https://oss.sonatype.org/content/repositories/snapshots/"
+        }
+		maven {
+            name = "gradle"
+            url = "https://plugins.gradle.org/m2/"
+        }
+    }
+    dependencies {
+        //Defaults to Java 8 & UTF-8 encoding
+        classpath "com.github.GTNewHorizons:ForgeGradle:1.2.4"
+		classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:1.4.21"
+    }
+}
+
+plugins {
+  // project.grgit is not available and the repository we're working in is not
+  // interacted with:
+  //id 'org.ajoberstar.grgit' version '4.0.2' apply false
+    id 'scala'
+}
+
+apply plugin: 'forge'
+apply plugin: 'kotlin'
+apply plugin: "idea"
+
+compileKotlin {
+    kotlinOptions {
+        jvmTarget = 1.8
+    }
+}
+
+idea {
+    module {
+        inheritOutputDirs = true
+        downloadJavadoc = true
+        downloadSources = true
+    }
+}
+
+configurations.all {
+    resolutionStrategy.cacheChangingModulesFor(0, TimeUnit.SECONDS)
+}
+
+sourceCompatibility = targetCompatibility = 1.8
+
+version = modVersion
+group= modGroup
+archivesBaseName = modId
+
+minecraft {
+    version = "${minecraftVersion}-${forgeVersion}-${minecraftVersion}"
+    runDir = "run"
+}
+
+repositories {
+    mavenCentral()
+    maven {
+        url = "https://jitpack.io"
+    }
+    maven {
+        url = "http://www.ryanliptak.com/maven/"
+    }
+    maven {
+        name = "Overmind forge repo mirror"
+        url = "https://gregtech.overminddl1.com/"
+    }
+    maven {
+        name = "forge"
+        url = "https://maven.minecraftforge.net"
+    }
+    maven {
+        url = "https://maven.shadowfacts.net/"
+    }
+    maven {
+        url = "https://cursemaven.com"
+    }
+}
+
+dependencies {
+    compileOnly("com.github.GTNewHorizons:Applied-Energistics-2-Unofficial:master-SNAPSHOT:dev") {
+        transitive = false
+    }
+    compileOnly("com.mod-buildcraft:buildcraft:7.1.23:dev") {
+        transitive = false
+    }
+    compile files('Forgelin-1.9.2-GTNH-1.7.10-Edition.jar')
+}
+
+
+processResources
+{
+    inputs.property "version", project.version
+    inputs.property "mcversion", project.minecraft.version
+    from(sourceSets.main.resources.srcDirs) {
+        include 'mcmod.info'
+        expand 'version':project.version, 'mcversion':project.minecraft.version
+    }
+    from(sourceSets.main.resources.srcDirs) {
+        exclude 'mcmod.info'
+    }
+}
+
+task devJar(type: Jar) {
+    classifier = 'dev'
+    from sourceSets.main.output
+}
+
+task sourcesJar(type: Jar) {
+    classifier = 'sources'
+    from sourceSets.main.allSource
+}
+
+artifacts {
+    archives(devJar)
+    archives(sourcesJar)
+}

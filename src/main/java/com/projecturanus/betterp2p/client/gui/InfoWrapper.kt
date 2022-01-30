@@ -1,0 +1,39 @@
+package com.projecturanus.betterp2p.client.gui
+
+import com.projecturanus.betterp2p.network.P2PInfo
+import net.minecraft.client.gui.GuiButton
+import net.minecraft.client.resources.I18n
+import net.minecraft.util.EnumFacing
+
+class InfoWrapper(info: P2PInfo) {
+    // Basic information
+    val index: Int = info.index
+    val frequency: Long = info.frequency
+    val hasChannel = info.hasChannel
+    val posX: Int = info.posX
+    val posY: Int = info.posY
+    val posZ: Int = info.posZ
+    val facing: EnumFacing = info.facing
+    val description: String
+    val output: Boolean = info.output
+    var error: Boolean = false
+
+    // Widgets
+    val selectButton = GuiButton(0, 0, 0, 34, 20, I18n.format("gui.advanced_memory_card.select"))
+    val bindButton = GuiButton(0, 0, 0, 34, 20, I18n.format("gui.advanced_memory_card.bind"))
+
+    init {
+        description = buildString {
+            append("P2P ")
+            if (output)
+                append(I18n.format("gui.advanced_memory_card.desc.mode.output"))
+            else
+                append(I18n.format("gui.advanced_memory_card.desc.mode.input"))
+            append(" - ")
+            if (info.frequency.toInt() == 0)
+                append(I18n.format("gui.advanced_memory_card.desc.not_set"))
+            else
+                append(info.frequency.toString())
+        }
+    }
+}
