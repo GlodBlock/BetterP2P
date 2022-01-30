@@ -32,12 +32,15 @@ object BetterP2P {
         ModNetwork.registerNetwork()
         BetterP2PConfig.loadConfig(Configuration(event.suggestedConfigurationFile))
         GameRegistry.registerItem(ItemAdvancedMemoryCard, "advanced_memory_card", MODID)
-        GameRegistry.addRecipe(ShapelessRecipes(ItemStack(ItemAdvancedMemoryCard), listOf(ItemStack(ToolNetworkTool()), ItemStack(ToolMemoryCard()))))
     }
 
     @Mod.EventHandler
     fun postInit(event: FMLPostInitializationEvent) {
         ServerPlayerDisconnectHandler.register()
         RenderHandler.register()
+        GameRegistry.addRecipe(ShapelessRecipes(ItemStack(ItemAdvancedMemoryCard), listOf(
+            GameRegistry.findItemStack("appliedenergistics2", "item.ToolNetworkTool", 1),
+            GameRegistry.findItemStack("appliedenergistics2", "item.ToolMemoryCard", 1)
+        )))
     }
 }
