@@ -7,7 +7,6 @@ import appeng.api.parts.IPart
 import appeng.api.parts.PartItemStack
 import appeng.me.GridAccessException
 import appeng.parts.p2p.PartP2PTunnel
-import appeng.util.Platform
 import com.projecturanus.betterp2p.network.P2PInfo
 import net.minecraft.entity.player.EntityPlayer
 import net.minecraft.item.ItemStack
@@ -93,8 +92,18 @@ var PartP2PTunnel<*>.outputProperty
         field.setBoolean(this, value)
     }
 
+fun ForgeDirection.getEnumIndex(): Int {
+    if (this == ForgeDirection.WEST) {
+        return 5
+    }
+    if (this == ForgeDirection.EAST) {
+        return 4
+    }
+    return this.ordinal
+}
+
 val PartP2PTunnel<*>.hasChannel
     get() = isPowered && isActive
 
 fun PartP2PTunnel<*>.getInfo(index: Int)
-    = P2PInfo(index, frequency, location.x, location.y, location.z, EnumFacing.getFront(side.ordinal), isOutput, hasChannel)
+    = P2PInfo(index, frequency, location.x, location.y, location.z, EnumFacing.getFront(side.getEnumIndex()), isOutput, hasChannel)

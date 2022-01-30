@@ -1,7 +1,5 @@
 package com.projecturanus.betterp2p
 
-import appeng.items.tools.ToolMemoryCard
-import appeng.items.tools.ToolNetworkTool
 import com.projecturanus.betterp2p.client.render.RenderHandler
 import com.projecturanus.betterp2p.config.BetterP2PConfig
 import com.projecturanus.betterp2p.item.ItemAdvancedMemoryCard
