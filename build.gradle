@@ -1,4 +1,4 @@
-//version: 1643020202
+//version: 1643844119
 /*
 DO NOT CHANGE THIS FILE!
 
@@ -40,11 +40,16 @@ plugins {
     id 'idea'
     id 'eclipse'
     id 'scala'
-    id("org.ajoberstar.grgit") version("3.1.1")
-    id("com.github.johnrengelman.shadow") version("4.0.4")
-    id("com.palantir.git-version") version("0.12.3")
-    id('de.undercouch.download') version('4.1.2')
-    id("maven-publish")
+    id('org.jetbrains.kotlin.jvm') version ('1.6.10') apply false
+    id('org.ajoberstar.grgit') version('4.1.1')
+    id('com.github.johnrengelman.shadow') version('4.0.4')
+    id('com.palantir.git-version') version('0.13.0') apply false
+    id('de.undercouch.download') version('5.0.1')
+    id('maven-publish')
+}
+
+if (project.file('.git/HEAD').isFile()) {
+    apply plugin: 'com.palantir.git-version'
 }
 
 apply plugin: 'forge'
@@ -153,17 +158,32 @@ configurations.all {
 }
 
 // Fix Jenkins' Git: chmod a file should not be detected as a change and append a '.dirty' to the version
-'git config core.fileMode false'.execute()
+try {
+    'git config core.fileMode false'.execute()
+}
+catch (Exception e) {
+    logger.error("\u001B[31mgit isn't installed at all\u001B[0m")
+}
 
 // Pulls version first from the VERSION env and then git tag
 String identifiedVersion
+String versionOverride = System.getenv("VERSION") ?: null
 try {
-    String versionOverride = System.getenv("VERSION") ?: null
     identifiedVersion = versionOverride == null ? gitVersion() : versionOverride
-    version = minecraftVersion + "-" + identifiedVersion
 }
 catch (Exception e) {
-    throw new IllegalStateException("This mod must be version controlled by Git AND the repository must provide at least one tag, or the VERSION override must be set!");
+    logger.error("\n\u001B[1;31mThis mod must be version controlled by Git AND the repository must provide at least one tag,\n" +
+        "or the VERSION override must be set! \u001B[32m(Don't download from GitHub using the ZIP option, instead\n" +
+        "clone the repository, see\u001B[33m https://gtnh.miraheze.org/wiki/Development \u001B[32mfor details.)\u001B[0m\n");
+    versionOverride = 'NO-GIT-TAG-SET'
+    identifiedVersion = versionOverride
+}
+version = minecraftVersion + '-' + identifiedVersion
+String modVersion = version
+
+if( identifiedVersion.equals(versionOverride) ) {
+    logger.error('\u001B[31m\u001B[7mWe hope you know what you\'re doing using\u001B[0m\u001B[1;34m ' + modVersion + '\u001B[0m\n');
+    logger.error('\7\u001B[31mGoing to blindly try to use\u001B[1;34m ' + modVersion + '\u001B[0m\u001B[31m, this probably won\'t work the way you expect!!\u001B[0m\n');
 }
 
 group = modGroup
@@ -180,10 +200,10 @@ def jvmArguments = []
 
 if(usesMixins.toBoolean()) {
     arguments += [
-            "--tweakClass org.spongepowered.asm.launch.MixinTweaker"
+        "--tweakClass org.spongepowered.asm.launch.MixinTweaker"
     ]
     jvmArguments += [
-            "-Dmixin.debug.countInjections=true", "-Dmixin.debug.verbose=true", "-Dmixin.debug.export=true"
+        "-Dmixin.debug.countInjections=true", "-Dmixin.debug.verbose=true", "-Dmixin.debug.export=true"
     ]
 }
 
@@ -200,7 +220,7 @@ minecraft {
             replace gradleTokenModName, modName
         }
         if(gradleTokenVersion) {
-            replace gradleTokenVersion, versionDetails().lastTag
+            replace gradleTokenVersion, modVersion
         }
         if(gradleTokenGroupName) {
             replace gradleTokenGroupName, modGroup
@@ -339,12 +359,12 @@ afterEvaluate {
     if(usesMixins.toBoolean()) {
         tasks.compileJava {
             options.compilerArgs += [
-                    "-AreobfSrgFile=${tasks.reobf.srg}",
-                    "-AoutSrgFile=${mixinSrg}",
-                    "-AoutRefMapFile=${refMap}",
-                    // Elan: from what I understand they are just some linter configs so you get some warning on how to properly code
-                    "-XDenableSunApiLintControl",
-                    "-XDignore.symbol.file"
+                "-AreobfSrgFile=${tasks.reobf.srg}",
+                "-AoutSrgFile=${mixinSrg}",
+                "-AoutRefMapFile=${refMap}",
+                // Elan: from what I understand they are just some linter configs so you get some warning on how to properly code
+                "-XDenableSunApiLintControl",
+                "-XDignore.symbol.file"
             ]
         }
     }
@@ -353,8 +373,8 @@ afterEvaluate {
 runClient {
     if(developmentEnvironmentUserName) {
         arguments += [
-                "--username",
-                developmentEnvironmentUserName
+            "--username",
+            developmentEnvironmentUserName
         ]
     }
 
@@ -369,38 +389,38 @@ runServer {
 
 tasks.withType(JavaExec).configureEach {
     javaLauncher.set(
-            javaToolchains.launcherFor {
-                languageVersion = projectJavaVersion
-            }
+        javaToolchains.launcherFor {
+            languageVersion = projectJavaVersion
+        }
     )
 }
 
 processResources
-{
-    // this will ensure that this task is redone when the versions change.
-    inputs.property "version", project.version
-    inputs.property "mcversion", project.minecraft.version
+    {
+        // this will ensure that this task is redone when the versions change.
+        inputs.property "version", project.version
+        inputs.property "mcversion", project.minecraft.version
 
-    // replace stuff in mcmod.info, nothing else
-    from(sourceSets.main.resources.srcDirs) {
-        include 'mcmod.info'
+        // replace stuff in mcmod.info, nothing else
+        from(sourceSets.main.resources.srcDirs) {
+            include 'mcmod.info'
 
-        // replace version and mcversion
-        expand "minecraftVersion": project.minecraft.version,
-                "modVersion": versionDetails().lastTag,
+            // replace version and mcversion
+            expand "minecraftVersion": project.minecraft.version,
+                "modVersion": modVersion,
                 "modId": modId,
                 "modName": modName
-    }
+        }
 
-    if(usesMixins.toBoolean()) {
-        from refMap
-    }
+        if(usesMixins.toBoolean()) {
+            from refMap
+        }
 
-    // copy everything else, thats not the mcmod.info
-    from(sourceSets.main.resources.srcDirs) {
-        exclude 'mcmod.info'
+        // copy everything else, thats not the mcmod.info
+        from(sourceSets.main.resources.srcDirs) {
+            exclude 'mcmod.info'
+        }
     }
-}
 
 def getManifestAttributes() {
     def manifestAttributes = [:]
@@ -418,9 +438,9 @@ def getManifestAttributes() {
 
     if(usesMixins.toBoolean()) {
         manifestAttributes += [
-                "TweakClass" : "org.spongepowered.asm.launch.MixinTweaker",
-                "MixinConfigs" : "mixins." + modId + ".json",
-                "ForceLoadAsMod" : containsMixinsAndOrCoreModOnly.toBoolean() == false
+            "TweakClass" : "org.spongepowered.asm.launch.MixinTweaker",
+            "MixinConfigs" : "mixins." + modId + ".json",
+            "ForceLoadAsMod" : containsMixinsAndOrCoreModOnly.toBoolean() == false
         ]
     }
     return manifestAttributes
@@ -507,7 +527,7 @@ artifacts {
     }
 }
 
-// The gradle metadata includes all of the additional deps that we disabled from POM generation (including forgeBin with no groupID), 
+// The gradle metadata includes all of the additional deps that we disabled from POM generation (including forgeBin with no groupID),
 // and isn't strictly needed with the POM so just disable it.
 tasks.withType(GenerateModuleMetadata) {
     enabled = false
@@ -534,7 +554,7 @@ publishing {
             artifactId = System.getenv("ARTIFACT_ID") ?: project.name
             // Using the identified version, not project.version as it has the prepended 1.7.10
             version = System.getenv("RELEASE_VERSION") ?: identifiedVersion
-            
+
             // Remove all non GTNH deps here.
             // Original intention was to remove an invalid forgeBin being generated without a groupId (mandatory), but
             // it also removes all of the MC deps
@@ -654,7 +674,7 @@ def deobf(String sourceURL, String fileName) {
     String bon2File  = bon2Dir + "/BON2-2.5.0.jar"
     String obfFile = cacheDir + "modules-2/files-2.1/" + fileName + ".jar"
     String deobfFile = cacheDir + "modules-2/files-2.1/" + fileName + "-deobf.jar"
-    
+
     if(file(deobfFile).exists()) {
         return files(deobfFile)
     }
