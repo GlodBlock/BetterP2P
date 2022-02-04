@@ -14,6 +14,7 @@ import net.minecraft.client.gui.GuiScreen
 import net.minecraft.client.resources.I18n
 import net.minecraft.util.ResourceLocation
 import org.lwjgl.input.Mouse
+import java.util.*
 
 class GuiAdvancedMemoryCard(msg: S2CListP2P) : GuiScreen(), TextureBound {
     private val outputColor = 0x4566ccff
@@ -81,7 +82,7 @@ class GuiAdvancedMemoryCard(msg: S2CListP2P) : GuiScreen(), TextureBound {
         }
     }
 
-    fun sortInfo() {
+    private fun sortInfo() {
         sortedInfo = infos.sortedBy {
             if (it.index == selectedIndex) {
                 -2 // Put the selected p2p in the front
@@ -95,7 +96,7 @@ class GuiAdvancedMemoryCard(msg: S2CListP2P) : GuiScreen(), TextureBound {
         }
     }
 
-    fun checkInfo() {
+    private fun checkInfo() {
         infos.forEach { it.error = false }
         infos.groupBy { it.frequency }.filter { it.value.none { x -> !x.output } }.forEach { it.value.forEach { info ->
             info.error = true
@@ -112,11 +113,11 @@ class GuiAdvancedMemoryCard(msg: S2CListP2P) : GuiScreen(), TextureBound {
         refreshOverlay()
     }
 
-    fun syncMemoryInfo() {
+    private fun syncMemoryInfo() {
         ModNetwork.channel.sendToServer(C2SUpdateInfo(MemoryInfo(selectedIndex, selectedInfo?.frequency ?: 0, mode)))
     }
 
-    fun drawInformation() {
+    private fun drawInformation() {
         val x = 8
         var y = 170
         for (line in descriptionLines) {
@@ -142,7 +143,7 @@ class GuiAdvancedMemoryCard(msg: S2CListP2P) : GuiScreen(), TextureBound {
 
         if (modeButton.func_146115_a()) {
             descriptionLines.clear()
-            descriptionLines += I18n.format("gui.advanced_memory_card.desc.mode", I18n.format("gui.advanced_memory_card.mode.${mode.next().name.toLowerCase()}"))
+            descriptionLines += I18n.format("gui.advanced_memory_card.desc.mode", I18n.format("gui.advanced_memory_card.mode.${mode.next().name.lowercase(Locale.getDefault())}"))
         } else {
             descriptionLines.clear()
         }
@@ -161,19 +162,19 @@ class GuiAdvancedMemoryCard(msg: S2CListP2P) : GuiScreen(), TextureBound {
     }
 
     private fun getModeString(): String {
-        return I18n.format("gui.advanced_memory_card.mode.${mode.name.toLowerCase()}")
+        return I18n.format("gui.advanced_memory_card.mode.${mode.name.lowercase(Locale.getDefault())}")
     }
 
-    fun findInput(frequency: Long) =
+    private fun findInput(frequency: Long) =
         infos.find { it.frequency == frequency && !it.output }
 
-    fun selectInfo(index: Int) {
+    private fun selectInfo(index: Int) {
         selectedIndex = index
         syncMemoryInfo()
         refreshOverlay()
     }
 
-    fun refreshOverlay() {
+    private fun refreshOverlay() {
         ClientCache.selectedPosition = arrayListOf(selectedInfo?.posX, selectedInfo?.posY, selectedInfo?.posZ)
         ClientCache.selectedFacing = selectedInfo?.facing
         ClientCache.positions.clear()

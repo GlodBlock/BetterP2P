@@ -4,6 +4,7 @@ import com.projecturanus.betterp2p.network.P2PInfo
 import net.minecraft.client.gui.GuiButton
 import net.minecraft.client.resources.I18n
 import net.minecraft.util.EnumFacing
+import java.util.*
 
 class InfoWrapper(info: P2PInfo) {
     // Basic information
@@ -45,7 +46,7 @@ fun Long.toHexString(): String {
         hex += Integer.toHexString((tmp % 16).toInt())
         tmp /= 16
     }
-    return hex.toUpperCase().reversed()
+    return hex.uppercase(Locale.getDefault()).reversed()
 }
 
 fun String.format4(): String {

@@ -99,24 +99,27 @@ boolean noPublishedSources = project.findProperty("noPublishedSources") ? projec
 
 String javaSourceDir = "src/main/java/"
 String scalaSourceDir = "src/main/scala/"
+String kotlinSourceDir = "src/main/kotlin/"
 
 String targetPackageJava = javaSourceDir + modGroup.toString().replaceAll("\\.", "/")
 String targetPackageScala = scalaSourceDir + modGroup.toString().replaceAll("\\.", "/")
-if((getFile(targetPackageJava).exists() || getFile(targetPackageScala).exists()) == false) {
-    throw new GradleException("Could not resolve \"modGroup\"! Could not find " + targetPackageJava + " or " + targetPackageScala)
+String targetPackageKotlin = kotlinSourceDir + modGroup.toString().replaceAll("\\.", "/")
+if(!(getFile(targetPackageJava).exists() || getFile(targetPackageScala).exists() || getFile(targetPackageKotlin).exists())) {
+    throw new GradleException("Could not resolve \"modGroup\"! Could not find " + targetPackageJava + " or " + targetPackageScala + " or " + targetPackageKotlin)
 }
 
 if(apiPackage) {
     targetPackageJava = javaSourceDir + modGroup.toString().replaceAll("\\.", "/") + "/" + apiPackage.toString().replaceAll("\\.", "/")
     targetPackageScala = scalaSourceDir + modGroup.toString().replaceAll("\\.", "/") + "/" + apiPackage.toString().replaceAll("\\.", "/")
-    if((getFile(targetPackageJava).exists() || getFile(targetPackageScala).exists()) == false) {
-        throw new GradleException("Could not resolve \"apiPackage\"! Could not find " + targetPackageJava + " or " + targetPackageScala)
+    targetPackageKotlin = kotlinSourceDir + modGroup.toString().replaceAll("\\.", "/") + "/" + apiPackage.toString().replaceAll("\\.", "/")
+    if(!(getFile(targetPackageJava).exists() || getFile(targetPackageScala).exists() || getFile(targetPackageKotlin).exists())) {
+        throw new GradleException("Could not resolve \"apiPackage\"! Could not find " + targetPackageJava + " or " + targetPackageScala + " or " + targetPackageKotlin)
     }
 }
 
 if(accessTransformersFile) {
     String targetFile = "src/main/resources/META-INF/" + accessTransformersFile
-    if(getFile(targetFile).exists() == false) {
+    if(!getFile(targetFile).exists()) {
         throw new GradleException("Could not resolve \"accessTransformersFile\"! Could not find " + targetFile)
     }
 }
@@ -128,15 +131,17 @@ if(usesMixins.toBoolean()) {
 
     targetPackageJava = javaSourceDir + modGroup.toString().replaceAll("\\.", "/") + "/" + mixinsPackage.toString().replaceAll("\\.", "/")
     targetPackageScala = scalaSourceDir + modGroup.toString().replaceAll("\\.", "/") + "/" + mixinsPackage.toString().replaceAll("\\.", "/")
-    if((getFile(targetPackageJava).exists() || getFile(targetPackageScala).exists()) == false) {
-        throw new GradleException("Could not resolve \"mixinsPackage\"! Could not find " + targetPackageJava + " or " + targetPackageScala)
+    targetPackageKotlin = kotlinSourceDir + modGroup.toString().replaceAll("\\.", "/") + "/" + mixinsPackage.toString().replaceAll("\\.", "/")
+    if(!(getFile(targetPackageJava).exists() || getFile(targetPackageScala).exists() || getFile(targetPackageKotlin).exists())) {
+        throw new GradleException("Could not resolve \"mixinsPackage\"! Could not find " + targetPackageJava + " or " + targetPackageScala  + " or " + targetPackageKotlin)
     }
 
     String targetFileJava = javaSourceDir + modGroup.toString().replaceAll("\\.", "/") + "/" + mixinPlugin.toString().replaceAll("\\.", "/") + ".java"
     String targetFileScala = scalaSourceDir + modGroup.toString().replaceAll("\\.", "/") + "/" + mixinPlugin.toString().replaceAll("\\.", "/") + ".scala"
     String targetFileScalaJava = scalaSourceDir + modGroup.toString().replaceAll("\\.", "/") + "/" + mixinPlugin.toString().replaceAll("\\.", "/") + ".java"
-    if((getFile(targetFileJava).exists() || getFile(targetFileScala).exists() || getFile(targetFileScalaJava).exists()) == false) {
-        throw new GradleException("Could not resolve \"mixinPlugin\"! Could not find " + targetFileJava + " or " + targetFileScala + " or " + targetFileScalaJava)
+    String targetFileKotlin = kotlinSourceDir + modGroup.toString().replaceAll("\\.", "/") + "/" + mixinPlugin.toString().replaceAll("\\.", "/") + ".kt"
+    if(!(getFile(targetFileJava).exists() || getFile(targetFileScala).exists() || getFile(targetFileScalaJava).exists() || getFile(targetFileKotlin).exists())) {
+        throw new GradleException("Could not resolve \"mixinPlugin\"! Could not find " + targetFileJava + " or " + targetFileScala + " or " + targetFileScalaJava + " or " + targetFileKotlin)
     }
 }
 
@@ -144,8 +149,9 @@ if(coreModClass) {
     String targetFileJava = javaSourceDir + modGroup.toString().replaceAll("\\.", "/") + "/" + coreModClass.toString().replaceAll("\\.", "/") + ".java"
     String targetFileScala = scalaSourceDir + modGroup.toString().replaceAll("\\.", "/") + "/" + coreModClass.toString().replaceAll("\\.", "/") + ".scala"
     String targetFileScalaJava = scalaSourceDir + modGroup.toString().replaceAll("\\.", "/") + "/" + coreModClass.toString().replaceAll("\\.", "/") + ".java"
-    if((getFile(targetFileJava).exists() || getFile(targetFileScala).exists() || getFile(targetFileScalaJava).exists()) == false) {
-        throw new GradleException("Could not resolve \"coreModClass\"! Could not find " + targetFileJava + " or " + targetFileScala + " or " + targetFileScalaJava)
+    String targetFileKotlin = kotlinSourceDir + modGroup.toString().replaceAll("\\.", "/") + "/" + coreModClass.toString().replaceAll("\\.", "/") + ".kt"
+    if(!(getFile(targetFileJava).exists() || getFile(targetFileScala).exists() || getFile(targetFileScalaJava).exists() || getFile(targetFileKotlin).exists())) {
+        throw new GradleException("Could not resolve \"coreModClass\"! Could not find " + targetFileJava + " or " + targetFileScala + " or " + targetFileScalaJava + " or " + targetFileKotlin)
     }
 }
 
@@ -173,8 +179,8 @@ try {
 }
 catch (Exception e) {
     logger.error("\n\u001B[1;31mThis mod must be version controlled by Git AND the repository must provide at least one tag,\n" +
-        "or the VERSION override must be set! \u001B[32m(Don't download from GitHub using the ZIP option, instead\n" +
-        "clone the repository, see\u001B[33m https://gtnh.miraheze.org/wiki/Development \u001B[32mfor details.)\u001B[0m\n");
+                 "or the VERSION override must be set! \u001B[32m(Don't download from GitHub using the ZIP option, instead\n" +
+                 "clone the repository, see\u001B[33m https://gtnh.miraheze.org/wiki/Development \u001B[32mfor details.)\u001B[0m\n");
     versionOverride = 'NO-GIT-TAG-SET'
     identifiedVersion = versionOverride
 }
@@ -200,10 +206,10 @@ def jvmArguments = []
 
 if(usesMixins.toBoolean()) {
     arguments += [
-        "--tweakClass org.spongepowered.asm.launch.MixinTweaker"
+            "--tweakClass org.spongepowered.asm.launch.MixinTweaker"
     ]
     jvmArguments += [
-        "-Dmixin.debug.countInjections=true", "-Dmixin.debug.verbose=true", "-Dmixin.debug.export=true"
+            "-Dmixin.debug.countInjections=true", "-Dmixin.debug.verbose=true", "-Dmixin.debug.export=true"
     ]
 }
 
@@ -359,12 +365,12 @@ afterEvaluate {
     if(usesMixins.toBoolean()) {
         tasks.compileJava {
             options.compilerArgs += [
-                "-AreobfSrgFile=${tasks.reobf.srg}",
-                "-AoutSrgFile=${mixinSrg}",
-                "-AoutRefMapFile=${refMap}",
-                // Elan: from what I understand they are just some linter configs so you get some warning on how to properly code
-                "-XDenableSunApiLintControl",
-                "-XDignore.symbol.file"
+                    "-AreobfSrgFile=${tasks.reobf.srg}",
+                    "-AoutSrgFile=${mixinSrg}",
+                    "-AoutRefMapFile=${refMap}",
+                    // Elan: from what I understand they are just some linter configs so you get some warning on how to properly code
+                    "-XDenableSunApiLintControl",
+                    "-XDignore.symbol.file"
             ]
         }
     }
@@ -373,8 +379,8 @@ afterEvaluate {
 runClient {
     if(developmentEnvironmentUserName) {
         arguments += [
-            "--username",
-            developmentEnvironmentUserName
+                "--username",
+                developmentEnvironmentUserName
         ]
     }
 
@@ -389,38 +395,38 @@ runServer {
 
 tasks.withType(JavaExec).configureEach {
     javaLauncher.set(
-        javaToolchains.launcherFor {
-            languageVersion = projectJavaVersion
-        }
+            javaToolchains.launcherFor {
+                languageVersion = projectJavaVersion
+            }
     )
 }
 
 processResources
-    {
-        // this will ensure that this task is redone when the versions change.
-        inputs.property "version", project.version
-        inputs.property "mcversion", project.minecraft.version
+{
+    // this will ensure that this task is redone when the versions change.
+    inputs.property "version", project.version
+    inputs.property "mcversion", project.minecraft.version
 
-        // replace stuff in mcmod.info, nothing else
-        from(sourceSets.main.resources.srcDirs) {
-            include 'mcmod.info'
+    // replace stuff in mcmod.info, nothing else
+    from(sourceSets.main.resources.srcDirs) {
+        include 'mcmod.info'
 
-            // replace version and mcversion
-            expand "minecraftVersion": project.minecraft.version,
-                "modVersion": modVersion,
-                "modId": modId,
-                "modName": modName
-        }
-
-        if(usesMixins.toBoolean()) {
-            from refMap
-        }
-
-        // copy everything else, thats not the mcmod.info
-        from(sourceSets.main.resources.srcDirs) {
-            exclude 'mcmod.info'
-        }
+        // replace version and mcversion
+        expand "minecraftVersion": project.minecraft.version,
+            "modVersion": modVersion,
+            "modId": modId,
+            "modName": modName
     }
+
+    if(usesMixins.toBoolean()) {
+        from refMap
+    }
+
+    // copy everything else, thats not the mcmod.info
+    from(sourceSets.main.resources.srcDirs) {
+        exclude 'mcmod.info'
+    }
+}
 
 def getManifestAttributes() {
     def manifestAttributes = [:]
@@ -438,9 +444,9 @@ def getManifestAttributes() {
 
     if(usesMixins.toBoolean()) {
         manifestAttributes += [
-            "TweakClass" : "org.spongepowered.asm.launch.MixinTweaker",
-            "MixinConfigs" : "mixins." + modId + ".json",
-            "ForceLoadAsMod" : containsMixinsAndOrCoreModOnly.toBoolean() == false
+                "TweakClass" : "org.spongepowered.asm.launch.MixinTweaker",
+                "MixinConfigs" : "mixins." + modId + ".json",
+                "ForceLoadAsMod" : containsMixinsAndOrCoreModOnly.toBoolean() == false
         ]
     }
     return manifestAttributes
@@ -667,7 +673,7 @@ def deobf(String sourceURL) {
     }
 }
 
-// The method above is to be prefered. Use this method if the filename is not at the end of the URL.
+// The method above is to be preferred. Use this method if the filename is not at the end of the URL.
 def deobf(String sourceURL, String fileName) {
     String cacheDir = System.getProperty("user.home") + "/.gradle/caches/"
     String bon2Dir = cacheDir + "forge_gradle/deobf"
