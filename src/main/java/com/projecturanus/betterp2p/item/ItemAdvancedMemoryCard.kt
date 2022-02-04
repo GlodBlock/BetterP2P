@@ -24,6 +24,7 @@ import net.minecraft.nbt.NBTTagCompound
 import net.minecraft.util.StatCollector
 import net.minecraft.world.World
 import net.minecraftforge.common.util.ForgeDirection
+import java.util.*
 
 object ItemAdvancedMemoryCard : Item() {
     init {
@@ -47,7 +48,7 @@ object ItemAdvancedMemoryCard : Item() {
     @SideOnly(Side.CLIENT)
     override fun addInformation(stack: ItemStack, player: EntityPlayer, tooltip: MutableList<Any?>, boolean: Boolean) {
         val info = getInfo(stack)
-        tooltip += StatCollector.translateToLocal("gui.advanced_memory_card.mode.${info.mode.name.toLowerCase()}")
+        tooltip += StatCollector.translateToLocal("gui.advanced_memory_card.mode.${info.mode.name.lowercase(Locale.getDefault())}")
     }
 
     @SideOnly(Side.CLIENT)
@@ -97,7 +98,7 @@ object ItemAdvancedMemoryCard : Item() {
         itemIcon = ri.registerIcon("$MODID:advanced_memory_card")
     }
 
-    fun getInfo(stack: ItemStack): MemoryInfo {
+    private fun getInfo(stack: ItemStack): MemoryInfo {
         if (stack.item != this) throw ClassCastException("Cannot cast ${stack.item.javaClass.name} to ${javaClass.name}")
 
         if (stack.tagCompound == null) stack.tagCompound = NBTTagCompound()
