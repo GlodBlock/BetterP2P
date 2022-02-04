@@ -14,14 +14,13 @@ import net.minecraft.item.crafting.ShapelessRecipes
 import net.minecraftforge.common.config.Configuration
 import org.apache.logging.log4j.Logger
 
-const val MODID = "GRADLETOKEN_MODID"
-const val MODVER = "GRADLETOKEN_VERSION"
+const val MODID = "betterp2p"
 
 /**
  * Better P2P is created by LasmGratel.
  * GlodBlock backported this to 1.7.10.
  */
-@Mod(modid = MODID, version = MODVER, modLanguageAdapter = "net.shadowfacts.forgelin.KotlinAdapter", dependencies = "required-after: appliedenergistics2; required-after: forgelin;")
+@Mod(modid = MODID, version = "GRADLETOKEN_VERSION", modLanguageAdapter = "net.shadowfacts.forgelin.KotlinAdapter", dependencies = "required-after: appliedenergistics2; required-after: forgelin;")
 object BetterP2P {
     lateinit var logger: Logger
 
