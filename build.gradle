@@ -1,4 +1,4 @@
-//version: 1643844119
+//version: 1644194279
 /*
 DO NOT CHANGE THIS FILE!
 
@@ -185,7 +185,7 @@ catch (Exception e) {
     identifiedVersion = versionOverride
 }
 version = minecraftVersion + '-' + identifiedVersion
-String modVersion = version
+String modVersion = identifiedVersion
 
 if( identifiedVersion.equals(versionOverride) ) {
     logger.error('\u001B[31m\u001B[7mWe hope you know what you\'re doing using\u001B[0m\u001B[1;34m ' + modVersion + '\u001B[0m\n');
@@ -406,7 +406,7 @@ processResources
     // this will ensure that this task is redone when the versions change.
     inputs.property "version", project.version
     inputs.property "mcversion", project.minecraft.version
-
+    
     // replace stuff in mcmod.info, nothing else
     from(sourceSets.main.resources.srcDirs) {
         include 'mcmod.info'
@@ -533,7 +533,7 @@ artifacts {
     }
 }
 
-// The gradle metadata includes all of the additional deps that we disabled from POM generation (including forgeBin with no groupID),
+// The gradle metadata includes all of the additional deps that we disabled from POM generation (including forgeBin with no groupID), 
 // and isn't strictly needed with the POM so just disable it.
 tasks.withType(GenerateModuleMetadata) {
     enabled = false
@@ -560,7 +560,7 @@ publishing {
             artifactId = System.getenv("ARTIFACT_ID") ?: project.name
             // Using the identified version, not project.version as it has the prepended 1.7.10
             version = System.getenv("RELEASE_VERSION") ?: identifiedVersion
-
+            
             // Remove all non GTNH deps here.
             // Original intention was to remove an invalid forgeBin being generated without a groupId (mandatory), but
             // it also removes all of the MC deps
@@ -673,14 +673,14 @@ def deobf(String sourceURL) {
     }
 }
 
-// The method above is to be preferred. Use this method if the filename is not at the end of the URL.
+// The method above is to be prefered. Use this method if the filename is not at the end of the URL.
 def deobf(String sourceURL, String fileName) {
     String cacheDir = System.getProperty("user.home") + "/.gradle/caches/"
     String bon2Dir = cacheDir + "forge_gradle/deobf"
     String bon2File  = bon2Dir + "/BON2-2.5.0.jar"
     String obfFile = cacheDir + "modules-2/files-2.1/" + fileName + ".jar"
     String deobfFile = cacheDir + "modules-2/files-2.1/" + fileName + "-deobf.jar"
-
+    
     if(file(deobfFile).exists()) {
         return files(deobfFile)
     }
