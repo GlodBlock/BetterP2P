@@ -1,10 +1,10 @@
 // Add your dependencies here
 
 dependencies {
-    compileOnly("com.github.GTNewHorizons:Applied-Energistics-2-Unofficial:rv3-beta-70-GTNH:dev") {
+    compileOnly("com.github.GTNewHorizons:Applied-Energistics-2-Unofficial:rv3-beta-75-GTNH:dev") {
         transitive = false
     }
-    compileOnly("com.github.GTNewHorizons:BuildCraft:7.1.24:dev") {
+    compileOnly("com.github.GTNewHorizons:BuildCraft:7.1.26:dev") {
         transitive = false
     }
     compile files('Forgelin-1.9.2-GTNH-1.7.10-Edition.jar')
