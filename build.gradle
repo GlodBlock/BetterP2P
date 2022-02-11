@@ -58,7 +58,7 @@ if (project.file('.git/HEAD').isFile()) {
     apply plugin: 'com.palantir.git-version'
 }
 
-def out = services.get(StyledTextOutputFactory).create("an-output")
+def out = services.get(StyledTextOutputFactory).create('an-output')
 
 apply plugin: 'forge'
 
@@ -195,9 +195,8 @@ catch (Exception e) {
     identifiedVersion = versionOverride
 }
 version = minecraftVersion + '-' + identifiedVersion
-ext {
-    modVersion = identifiedVersion
-}
+String modVersion = identifiedVersion
+
 if( identifiedVersion.equals(versionOverride) ) {
     out.style(Style.Failure).text('Override version to ').style(Style.Identifier).text(modVersion).style(Style.Failure).println('!\7')
 }
