@@ -10,5 +10,5 @@ compileKotlin {
 buildConfig {
     packageName("com.projecturanus.betterp2p")
     buildConfigField('String', 'MODVER', "\"${project.modVersion}\"")
-    useKotlinOutput()
+    useKotlinOutput { topLevelConstants = true }
 }
