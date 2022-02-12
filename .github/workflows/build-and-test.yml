@@ -37,7 +37,7 @@ jobs:
       run: |
         mkdir run
         echo "eula=true" > run/eula.txt
-        timeout 90 ./gradlew runServer | tee -a server.log
+        timeout 90 ./gradlew runServer 2>&1 | tee -a server.log || true
 
     - name: Test no errors reported during server run
       run: |

@@ -22,7 +22,7 @@ if grep --quiet "The state engine was in incorrect state ERRORED and forced into
   exit 1
 fi
 
-if ! grep --quiet -Po -v '.+Done \(.+\)\! For help, type "help" or "\?"' $SERVERLOG; then
+if ! grep --quiet -Po '.+Done \(.+\)\! For help, type "help" or "\?"' $SERVERLOG; then
   echo "Server didn't finish startup:"
   cat server.log
   exit 1
