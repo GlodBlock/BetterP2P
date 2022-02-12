@@ -9,6 +9,7 @@ import cpw.mods.fml.common.Mod
 import cpw.mods.fml.common.event.FMLPostInitializationEvent
 import cpw.mods.fml.common.event.FMLPreInitializationEvent
 import cpw.mods.fml.common.registry.GameRegistry
+import cpw.mods.fml.relauncher.FMLLaunchHandler
 import net.minecraft.item.ItemStack
 import net.minecraft.item.crafting.ShapelessRecipes
 import net.minecraftforge.common.config.Configuration
@@ -18,9 +19,11 @@ const val MODID = "betterp2p"
 
 /**
  * Better P2P is created by LasmGratel.
- * GlodBlock backported this to 1.7.10.
+ * GlodBlock backported this to 1.7.10
+ *
+ * MODVER below is handled by gradle, ignore IDE errors.
  */
-@Mod(modid = MODID, version = "GRADLETOKEN_VERSION", modLanguageAdapter = "net.shadowfacts.forgelin.KotlinAdapter", dependencies = "required-after: appliedenergistics2; required-after: forgelin;")
+@Mod(modid = MODID, version = MODVER, modLanguageAdapter = "net.shadowfacts.forgelin.KotlinAdapter", dependencies = "required-after:appliedenergistics2; required-after:forgelin;")
 object BetterP2P {
     lateinit var logger: Logger
 
@@ -35,7 +38,9 @@ object BetterP2P {
     @Mod.EventHandler
     fun postInit(event: FMLPostInitializationEvent) {
         ServerPlayerDisconnectHandler.register()
-        RenderHandler.register()
+        if(FMLLaunchHandler.side().isClient()) {
+            RenderHandler.register()
+        }
         GameRegistry.addRecipe(ShapelessRecipes(ItemStack(ItemAdvancedMemoryCard), listOf(
             GameRegistry.findItemStack("appliedenergistics2", "item.ToolNetworkTool", 1),
             GameRegistry.findItemStack("appliedenergistics2", "item.ToolMemoryCard", 1)
