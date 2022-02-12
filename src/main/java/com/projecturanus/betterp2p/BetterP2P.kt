@@ -9,6 +9,7 @@ import cpw.mods.fml.common.Mod
 import cpw.mods.fml.common.event.FMLPostInitializationEvent
 import cpw.mods.fml.common.event.FMLPreInitializationEvent
 import cpw.mods.fml.common.registry.GameRegistry
+import cpw.mods.fml.relauncher.FMLLaunchHandler
 import net.minecraft.item.ItemStack
 import net.minecraft.item.crafting.ShapelessRecipes
 import net.minecraftforge.common.config.Configuration
@@ -35,7 +36,9 @@ object BetterP2P {
     @Mod.EventHandler
     fun postInit(event: FMLPostInitializationEvent) {
         ServerPlayerDisconnectHandler.register()
-        RenderHandler.register()
+        if(FMLLaunchHandler.side().isClient()) {
+            RenderHandler.register()
+        }
         GameRegistry.addRecipe(ShapelessRecipes(ItemStack(ItemAdvancedMemoryCard), listOf(
             GameRegistry.findItemStack("appliedenergistics2", "item.ToolNetworkTool", 1),
             GameRegistry.findItemStack("appliedenergistics2", "item.ToolMemoryCard", 1)
