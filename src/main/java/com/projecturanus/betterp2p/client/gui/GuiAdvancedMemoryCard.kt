@@ -175,10 +175,16 @@ class GuiAdvancedMemoryCard(msg: S2CListP2P) : GuiScreen(), TextureBound {
     }
 
     private fun refreshOverlay() {
-        ClientCache.selectedPosition = arrayListOf(selectedInfo?.posX, selectedInfo?.posY, selectedInfo?.posZ)
-        ClientCache.selectedFacing = selectedInfo?.facing
+        if (selectedInfo == null) {
+            ClientCache.selectedPosition = null
+            ClientCache.selectedFacing = null
+        }
+        else {
+            ClientCache.selectedPosition = arrayListOf(selectedInfo?.posX, selectedInfo?.posY, selectedInfo?.posZ)
+            ClientCache.selectedFacing = selectedInfo?.facing
+        }
         ClientCache.positions.clear()
-        ClientCache.positions.addAll(infos.filter { it.frequency == selectedInfo?.frequency && it != selectedInfo }.map { arrayListOf(it.posX, it.posY, it.posZ)  to it.facing })
+        ClientCache.positions.addAll(infos.filter { it.frequency == selectedInfo?.frequency && it != selectedInfo }.map { arrayListOf(it.posX, it.posY, it.posZ) to it.facing })
     }
 
     private fun onSelectButtonClicked(info: InfoWrapper) {
