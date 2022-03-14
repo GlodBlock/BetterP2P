@@ -106,4 +106,4 @@ val PartP2PTunnel<*>.hasChannel
     get() = isPowered && isActive
 
 fun PartP2PTunnel<*>.getInfo(index: Int)
-    = P2PInfo(index, frequency, location.x, location.y, location.z, EnumFacing.getFront(side.getEnumIndex()), isOutput, hasChannel)
+    = P2PInfo(index, frequency, location.x, location.y, location.z, EnumFacing.getFront(side.getEnumIndex()), customName, isOutput, hasChannel)
