@@ -1,10 +1,10 @@
 [
     {
-        "modid":"betterp2p",
-        "name":"Better P2P",
+        "modid":"${modId}",
+        "name":"${modName}",
         "description":"An AE2 submod",
-        "mcversion":"${mcversion}",
-        "version": "${version}",
+        "mcversion":"${minecraftVersion}",
+        "version": "${modVersion}",
         "url":"https://github.com/LasmGratel/BetterP2P",
         "updateUrl":"",
         "authorList":[

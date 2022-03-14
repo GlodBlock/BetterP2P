@@ -1,5 +1,6 @@
 package com.projecturanus.betterp2p.client.gui
 
+import appeng.client.gui.widgets.MEGuiTextField
 import com.projecturanus.betterp2p.BetterP2P
 import com.projecturanus.betterp2p.MODID
 import com.projecturanus.betterp2p.capability.MemoryInfo
@@ -14,6 +15,7 @@ import net.minecraft.client.gui.GuiScreen
 import net.minecraft.client.resources.I18n
 import net.minecraft.util.ResourceLocation
 import org.lwjgl.input.Mouse
+import java.util.*
 
 class GuiAdvancedMemoryCard(msg: S2CListP2P) : GuiScreen(), TextureBound {
     private val outputColor = 0x4566ccff
@@ -34,6 +36,7 @@ class GuiAdvancedMemoryCard(msg: S2CListP2P) : GuiScreen(), TextureBound {
     private var selectedIndex = -1
 
     private lateinit var scrollBar: WidgetScrollBar
+    private lateinit var searchBar: MEGuiTextField
 
     private val infos = msg.infos.map(::InfoWrapper).toMutableList()
 
@@ -52,7 +55,7 @@ class GuiAdvancedMemoryCard(msg: S2CListP2P) : GuiScreen(), TextureBound {
 
     private var mode = msg.memoryInfo.mode
     private var modeString = getModeString()
-    private val modeButton by lazy { GuiButton(0, guiLeft + 8, guiTop + 140, 205, 20, modeString) }
+    private val modeButton by lazy { GuiButton(0, guiLeft + 8, guiTop + 154, 205, 20, modeString) }
 
     init {
         selectInfo(msg.memoryInfo.selectedIndex)
@@ -60,7 +63,7 @@ class GuiAdvancedMemoryCard(msg: S2CListP2P) : GuiScreen(), TextureBound {
         infoOnScreen = sortedInfo.take(5)
 
         val list = mutableListOf<WidgetP2PDevice>()
-        for (i in 0..4) {
+        for (i in 0..3) {
             list += WidgetP2PDevice(::selectedInfo, ::mode, { sortedInfo.getOrNull(i + scrollBar.currentScroll) }, 0, 0)
         }
         widgetDevices = list.toList()
@@ -70,18 +73,40 @@ class GuiAdvancedMemoryCard(msg: S2CListP2P) : GuiScreen(), TextureBound {
         super.initGui()
         checkInfo()
         scrollBar = WidgetScrollBar()
+        searchBar = MEGuiTextField(fontRendererObj, guiLeft + 148, guiTop + 3, 65, 10)
+        searchBar.maxStringLength = 25
+        searchBar.setTextColor(0xFFFFFF)
+        searchBar.visible = true
+        searchBar.enableBackgroundDrawing = false
         scrollBar.displayX = guiLeft + 218
         scrollBar.displayY = guiTop + 19
         scrollBar.height = 114
-        scrollBar.setRange(0, infos.size.coerceIn(0..(infos.size-5).coerceAtLeast(0)), 23)
+        scrollBar.setRange(0, infos.size.coerceIn(0..(infos.size - 4).coerceAtLeast(0)), 23)
 
-        for (i in 0..4) {
+        for (i in 0..3) {
             widgetDevices[i].x = guiLeft + tableX
-            widgetDevices[i].y = guiTop + tableY + 23 * i
+            widgetDevices[i].y = guiTop + tableY + 33 * i
         }
     }
 
-    fun sortInfo() {
+    private fun reGenInfoFromText() {
+        var tmpInfo = infos.filter { it.frequency.toHexString().contains(searchBar.text) || it.frequency.toHexString().format4().contains(searchBar.text) || it.name.contains(searchBar.text) }
+        if (searchBar.text.isEmpty())
+            tmpInfo = infos
+        sortedInfo = tmpInfo.sortedBy {
+            if (it.index == selectedIndex) {
+                -2 // Put the selected p2p in the front
+            } else if (it.frequency != 0.toLong() && it.frequency == selectedInfo?.frequency && !it.output) {
+                -3 // Put input in the beginning
+            } else if (it.frequency != 0.toLong() && it.frequency == selectedInfo?.frequency) {
+                -1 // Put same frequency in the front
+            } else {
+                it.frequency + Short.MAX_VALUE
+            }
+        }
+    }
+
+    private fun sortInfo() {
         sortedInfo = infos.sortedBy {
             if (it.index == selectedIndex) {
                 -2 // Put the selected p2p in the front
@@ -95,7 +120,7 @@ class GuiAdvancedMemoryCard(msg: S2CListP2P) : GuiScreen(), TextureBound {
         }
     }
 
-    fun checkInfo() {
+    private fun checkInfo() {
         infos.forEach { it.error = false }
         infos.groupBy { it.frequency }.filter { it.value.none { x -> !x.output } }.forEach { it.value.forEach { info ->
             info.error = true
@@ -112,13 +137,13 @@ class GuiAdvancedMemoryCard(msg: S2CListP2P) : GuiScreen(), TextureBound {
         refreshOverlay()
     }
 
-    fun syncMemoryInfo() {
+    private fun syncMemoryInfo() {
         ModNetwork.channel.sendToServer(C2SUpdateInfo(MemoryInfo(selectedIndex, selectedInfo?.frequency ?: 0, mode)))
     }
 
-    fun drawInformation() {
+    private fun drawInformation() {
         val x = 8
-        var y = 170
+        var y = 178
         for (line in descriptionLines) {
             fontRendererObj.drawString(line, guiLeft + x, guiTop + y, 0)
             y += fontRendererObj.FONT_HEIGHT
@@ -134,6 +159,7 @@ class GuiAdvancedMemoryCard(msg: S2CListP2P) : GuiScreen(), TextureBound {
         drawDefaultBackground()
         drawBackground()
         scrollBar.draw(this)
+        searchBar.drawTextBox()
 
         for (widget in widgetDevices) {
             widget.render(this, mouseX, mouseY, partialTicks)
@@ -142,7 +168,7 @@ class GuiAdvancedMemoryCard(msg: S2CListP2P) : GuiScreen(), TextureBound {
 
         if (modeButton.func_146115_a()) {
             descriptionLines.clear()
-            descriptionLines += I18n.format("gui.advanced_memory_card.desc.mode", I18n.format("gui.advanced_memory_card.mode.${mode.next().name.toLowerCase()}"))
+            descriptionLines += I18n.format("gui.advanced_memory_card.desc.mode", I18n.format("gui.advanced_memory_card.mode.${mode.next().name.lowercase(Locale.getDefault())}"))
         } else {
             descriptionLines.clear()
         }
@@ -161,23 +187,29 @@ class GuiAdvancedMemoryCard(msg: S2CListP2P) : GuiScreen(), TextureBound {
     }
 
     private fun getModeString(): String {
-        return I18n.format("gui.advanced_memory_card.mode.${mode.name.toLowerCase()}")
+        return I18n.format("gui.advanced_memory_card.mode.${mode.name.lowercase(Locale.getDefault())}")
     }
 
-    fun findInput(frequency: Long) =
+    private fun findInput(frequency: Long) =
         infos.find { it.frequency == frequency && !it.output }
 
-    fun selectInfo(index: Int) {
+    private fun selectInfo(index: Int) {
         selectedIndex = index
         syncMemoryInfo()
         refreshOverlay()
     }
 
-    fun refreshOverlay() {
-        ClientCache.selectedPosition = arrayListOf(selectedInfo?.posX, selectedInfo?.posY, selectedInfo?.posZ)
-        ClientCache.selectedFacing = selectedInfo?.facing
+    private fun refreshOverlay() {
+        if (selectedInfo == null) {
+            ClientCache.selectedPosition = null
+            ClientCache.selectedFacing = null
+        }
+        else {
+            ClientCache.selectedPosition = arrayListOf(selectedInfo?.posX, selectedInfo?.posY, selectedInfo?.posZ)
+            ClientCache.selectedFacing = selectedInfo?.facing
+        }
         ClientCache.positions.clear()
-        ClientCache.positions.addAll(infos.filter { it.frequency == selectedInfo?.frequency && it != selectedInfo }.map { arrayListOf(it.posX, it.posY, it.posZ)  to it.facing })
+        ClientCache.positions.addAll(infos.filter { it.frequency == selectedInfo?.frequency && it != selectedInfo }.map { arrayListOf(it.posX, it.posY, it.posZ) to it.facing })
     }
 
     private fun onSelectButtonClicked(info: InfoWrapper) {
@@ -215,6 +247,11 @@ class GuiAdvancedMemoryCard(msg: S2CListP2P) : GuiScreen(), TextureBound {
             switchMode()
         }
         scrollBar.click(mouseX, mouseY)
+        searchBar.mouseClicked(mouseX, mouseY, mouseButton)
+        if (mouseButton == 1 && searchBar.isMouseIn(mouseX, mouseY)) {
+            this.searchBar.text = ""
+            reGenInfoFromText()
+        }
         super.mouseClicked(mouseX, mouseY, mouseButton)
     }
 
@@ -247,5 +284,14 @@ class GuiAdvancedMemoryCard(msg: S2CListP2P) : GuiScreen(), TextureBound {
 
     override fun doesGuiPauseGame(): Boolean {
         return false
+    }
+
+    override fun keyTyped(char: Char, key: Int) {
+        if (char == ' ' && searchBar.text.isEmpty()) {
+            return
+        }
+        searchBar.textboxKeyTyped(char, key)
+        reGenInfoFromText()
+        super.keyTyped(char, key)
     }
 }

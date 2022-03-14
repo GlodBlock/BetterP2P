@@ -14,7 +14,7 @@ class WidgetP2PDevice(private val selectedInfoProperty: KMutableProperty0<InfoWr
     private val inactiveColor = 0x45FFEA05
 
     private val rowWidth = 203
-    private val rowHeight = 22
+    private val rowHeight = 32
 
     private var selectedInfo: InfoWrapper?
         get() = selectedInfoProperty.get()
@@ -43,6 +43,7 @@ class WidgetP2PDevice(private val selectedInfoProperty: KMutableProperty0<InfoWr
 
             fontRenderer.drawString(info.description, x + 24, y + 3, 0)
             fontRenderer.drawString(I18n.format("gui.advanced_memory_card.pos", info.posX, info.posY, info.posZ, info.facing.name), x + 24, y + 12, 0)
+            fontRenderer.drawString(I18n.format("gui.advanced_memory_card.name", info.name), x + 24, y + 21, 0)
 
             if (selectedInfo == null) {
                 info.bindButton.enabled = false
@@ -85,21 +86,24 @@ class WidgetP2PDevice(private val selectedInfoProperty: KMutableProperty0<InfoWr
             info.bindButton.enabled = false
             info.selectButton.enabled = true
 
-            info.selectButton.xPosition = x + 166
-            info.selectButton.yPosition = y + 1
+            info.selectButton.xPosition = x + 172
+            info.selectButton.width = 28
+            info.selectButton.yPosition = y + 6
             info.selectButton.drawButton(gui.mc, mouseX, mouseY)
         } else if (info.bindButton.enabled && info.selectButton.enabled) {
             info.bindButton.enabled = true
             info.selectButton.enabled = true
 
             // Select button on the left
-            info.selectButton.xPosition = x + 130
-            info.selectButton.yPosition = y + 1
+            info.selectButton.xPosition = x + 141
+            info.selectButton.width = 28
+            info.selectButton.yPosition = y + 6
             info.selectButton.drawButton(gui.mc, mouseX, mouseY)
 
             // Bind button on the right
-            info.bindButton.xPosition = x + 166
-            info.bindButton.yPosition = y + 1
+            info.bindButton.xPosition = x + 172
+            info.bindButton.width = 28
+            info.bindButton.yPosition = y + 6
             info.bindButton.drawButton(gui.mc, mouseX, mouseY)
         } else if (!info.selectButton.enabled && !info.bindButton.enabled) {
             // TODO Unbind

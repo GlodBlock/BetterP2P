@@ -112,12 +112,14 @@ public class OutlineRenderer {
         //BufferBuilder buffer = tessellator.getBuffer();
 
         for (Pair<List<Integer>, EnumFacing> coordinate : coordinates) {
+            List<Integer> pos = coordinate.component1();
+            EnumFacing facing = coordinate.component2();
+            if (pos == null || facing == null || pos.size() != 3)
+                continue;
             GlStateManager.pushMatrix();
             GlStateManager.translate(x, y, z);
             tessellator.startDrawing(GL11.GL_LINES);
             GL11.glLineWidth(thickness);
-            List<Integer> pos = coordinate.component1();
-            EnumFacing facing = coordinate.component2();
             tessellator.setTranslation(pos.get(0), pos.get(1), pos.get(2));
 
             renderHighLightedBlocksOutlineForFacing(tessellator, r, g, b, 255);
