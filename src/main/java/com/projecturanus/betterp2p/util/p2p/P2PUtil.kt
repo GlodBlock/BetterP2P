@@ -39,21 +39,21 @@ fun linkP2P(player: EntityPlayer, inputIndex: Int, outputIndex: Int, status: P2P
     // TODO reduce changes
     if (input.frequency.toInt() == 0 || input.isOutput) {
         frequency = System.currentTimeMillis()
-        updateP2P(input, frequency, false)
+        updateP2P(input, frequency, false, input.customName)
     }
     if (cache.getInput(frequency) != null) {
         val originalInput = cache.getInput(frequency)
         if (originalInput != input)
-            updateP2P(originalInput, frequency, true)
+            updateP2P(originalInput, frequency, true, input.customName)
     }
 
-    return updateP2P(input, frequency, false) to updateP2P(output, frequency, true)
+    return updateP2P(input, frequency, false, input.customName) to updateP2P(output, frequency, true, input.customName)
 }
 
 /**
  * Due to Applied Energistics' limit
  */
-fun updateP2P(tunnel: PartP2PTunnel<*>, frequency: Long, output: Boolean): PartP2PTunnel<*> {
+fun updateP2P(tunnel: PartP2PTunnel<*>, frequency: Long, output: Boolean, name: String): PartP2PTunnel<*> {
     val side = tunnel.side
     tunnel.host.removePart(side, true)
 
@@ -61,6 +61,7 @@ fun updateP2P(tunnel: PartP2PTunnel<*>, frequency: Long, output: Boolean): PartP
     val p2pItem: ItemStack = tunnel.getItemStack(PartItemStack.Wrench)
     val type: String = p2pItem.unlocalizedName
     tunnel.outputProperty = output
+    tunnel.customName = name
 
     p2pItem.writeToNBT(data)
     data.setLong("freq", frequency)
