@@ -20,7 +20,7 @@ fun linkP2P(player: EntityPlayer, inputIndex: Int, outputIndex: Int, status: P2P
 
     val grid: IGrid? = input.gridNode?.grid
     if (grid is ISecurityGrid) {
-        if (!grid.hasPermission(player, SecurityPermissions.BUILD)) {
+        if (!grid.hasPermission(player, SecurityPermissions.BUILD) || !grid.hasPermission(player, SecurityPermissions.SECURITY)) {
             return null
         }
     }
@@ -39,22 +39,23 @@ fun linkP2P(player: EntityPlayer, inputIndex: Int, outputIndex: Int, status: P2P
     // TODO reduce changes
     if (input.frequency.toInt() == 0 || input.isOutput) {
         frequency = System.currentTimeMillis()
-        updateP2P(input, frequency, false, input.customName)
+        updateP2P(input, frequency, false, player, input.customName)
     }
     if (cache.getInput(frequency) != null) {
         val originalInput = cache.getInput(frequency)
         if (originalInput != input)
-            updateP2P(originalInput, frequency, true, input.customName)
+            updateP2P(originalInput, frequency, true, player, input.customName)
     }
 
-    return updateP2P(input, frequency, false, input.customName) to updateP2P(output, frequency, true, input.customName)
+    return updateP2P(input, frequency, false, player, input.customName) to updateP2P(output, frequency, true, player, input.customName)
 }
 
 /**
  * Due to Applied Energistics' limit
  */
-fun updateP2P(tunnel: PartP2PTunnel<*>, frequency: Long, output: Boolean, name: String): PartP2PTunnel<*> {
+fun updateP2P(tunnel: PartP2PTunnel<*>, frequency: Long, output: Boolean, player: EntityPlayer, name: String): PartP2PTunnel<*> {
     val side = tunnel.side
+
     tunnel.host.removePart(side, true)
 
     val data = NBTTagCompound()
@@ -67,7 +68,7 @@ fun updateP2P(tunnel: PartP2PTunnel<*>, frequency: Long, output: Boolean, name: 
     data.setLong("freq", frequency)
 
     val newType = ItemStack.loadItemStackFromNBT(data)
-    val dir: ForgeDirection = tunnel.host?.addPart(newType, side, null) ?: throw RuntimeException("Cannot bind")
+    val dir: ForgeDirection = tunnel.host?.addPart(newType, side, player) ?: throw RuntimeException("Cannot bind")
     val newBus: IPart = tunnel.host.getPart(dir)
 
     if (newBus is PartP2PTunnel<*>) {
