@@ -73,11 +73,10 @@ class GuiAdvancedMemoryCard(msg: S2CListP2P) : GuiScreen(), TextureBound {
         super.initGui()
         checkInfo()
         scrollBar = WidgetScrollBar()
-        searchBar = MEGuiTextField(fontRendererObj, guiLeft + 148, guiTop + 3, 65, 10)
-        searchBar.maxStringLength = 25
-        searchBar.setTextColor(0xFFFFFF)
-        searchBar.visible = true
-        searchBar.enableBackgroundDrawing = false
+        searchBar = MEGuiTextField(65, 10)
+        searchBar.setMaxStringLength(25)
+        searchBar.x = guiLeft + 148
+        searchBar.y = guiTop + 5
         scrollBar.displayX = guiLeft + 218
         scrollBar.displayY = guiTop + 19
         scrollBar.height = 114
